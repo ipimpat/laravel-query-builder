@@ -3,13 +3,14 @@
 namespace Spatie\QueryBuilder;
 
 use Closure;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Spatie\QueryBuilder\Includes\IncludeInterface;
 use Spatie\QueryBuilder\Includes\IncludedCallback;
 use Spatie\QueryBuilder\Includes\IncludedCount;
 use Spatie\QueryBuilder\Includes\IncludedExists;
 use Spatie\QueryBuilder\Includes\IncludedRelationship;
-use Spatie\QueryBuilder\Includes\IncludeInterface;
 
 class AllowedInclude
 {
@@ -97,7 +98,9 @@ class AllowedInclude
             };
         }
 
-        ($this->includeClass)($query->getEloquentBuilder(), $this->internalName);
+        $query->getSubject() instanceof Model
+            ? ($this->includeClass)($query->getSubject(), $this->internalName)
+            : ($this->includeClass)($query->getEloquentBuilder(), $this->internalName);
     }
 
     public function getName(): string

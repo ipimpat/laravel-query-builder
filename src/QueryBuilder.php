@@ -28,11 +28,11 @@ class QueryBuilder implements ArrayAccess
     /** @var \Spatie\QueryBuilder\QueryBuilderRequest */
     protected $request;
 
-    /** @var \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation */
+    /** @var \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation */
     protected $subject;
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation $subject
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation $subject
      * @param null|\Illuminate\Http\Request $request
      */
     public function __construct($subject, ?Request $request = null)
@@ -42,14 +42,14 @@ class QueryBuilder implements ArrayAccess
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation $subject
+     * @param \Illuminate\Database\Eloquent\Builder|Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation $subject
      *
      * @return $this
      */
     protected function initializeSubject($subject): static
     {
         throw_unless(
-            $subject instanceof EloquentBuilder || $subject instanceof Relation,
+            $subject instanceof EloquentBuilder || $subject instanceof Model || $subject instanceof Relation,
             InvalidSubject::make($subject)
         );
 
@@ -93,7 +93,7 @@ class QueryBuilder implements ArrayAccess
      */
     public static function for($subject, ?Request $request = null): static
     {
-        if (is_subclass_of($subject, Model::class)) {
+        if (is_subclass_of($subject, Model::class) && !$subject instanceof Model) {
             $subject = $subject::query();
         }
 

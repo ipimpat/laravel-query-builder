@@ -4,6 +4,7 @@ namespace Spatie\QueryBuilder\Includes;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class IncludedCallback implements IncludeInterface
 {
@@ -14,10 +15,10 @@ class IncludedCallback implements IncludeInterface
         $this->callback = $callback;
     }
 
-    public function __invoke(Builder $query, string $relation)
+    public function __invoke(Builder|Model $query, string $relation)
     {
-        $query->with([
-            $relation => $this->callback,
-        ]);
+        $query instanceof Model
+            ? $query->load([$relation => $this->callback])
+            : $query->with([$relation => $this->callback]);
     }
 }

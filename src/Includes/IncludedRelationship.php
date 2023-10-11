@@ -4,6 +4,7 @@ namespace Spatie\QueryBuilder\Includes;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class IncludedRelationship implements IncludeInterface
@@ -11,7 +12,7 @@ class IncludedRelationship implements IncludeInterface
     /** @var Closure|null */
     public $getRequestedFieldsForRelatedTable;
 
-    public function __invoke(Builder $query, string $relationship)
+    public function __invoke(Builder|Model $query, string $relationship)
     {
         $relatedTables = collect(explode('.', $relationship));
 
@@ -33,7 +34,9 @@ class IncludedRelationship implements IncludeInterface
             })
             ->toArray();
 
-        $query->with($withs);
+        $query instanceof Model
+            ? $query->load($withs)
+            : $query->with($withs);
     }
 
     public static function getIndividualRelationshipPathsFromInclude(string $include): Collection

@@ -2,10 +2,13 @@
 
 namespace Spatie\QueryBuilder\Concerns;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\Exceptions\AllowedFieldsMustBeCalledBeforeAllowedIncludes;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
+use Spatie\QueryBuilder\Exceptions\InvalidSubject;
 use Spatie\QueryBuilder\Exceptions\UnknownIncludedFieldsQuery;
 
 trait AddsFieldsToQuery
@@ -14,6 +17,11 @@ trait AddsFieldsToQuery
 
     public function allowedFields($fields): static
     {
+        throw_unless(
+            $this->subject instanceof Builder || $this->subject instanceof Relation,
+            InvalidSubject::make($this->subject)
+        );
+
         if ($this->allowedIncludes instanceof Collection) {
             throw new AllowedFieldsMustBeCalledBeforeAllowedIncludes();
         }
