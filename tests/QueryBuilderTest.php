@@ -69,6 +69,14 @@ it('can be given a model class name', function () {
     );
 });
 
+it('can be given a model class instance', function () {
+    $subject = TestModel::create(['id' => 321, 'name' => 'John Doe']);
+
+    $queryBuilder = QueryBuilder::for($subject);
+
+    $this->assertSame($subject, $queryBuilder->getSubject());
+});
+
 it('can not be given a string that is not a class name', function () {
     $this->expectException(InvalidSubject::class);
 

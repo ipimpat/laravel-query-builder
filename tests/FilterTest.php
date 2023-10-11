@@ -5,18 +5,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-use function PHPUnit\Framework\assertObjectHasProperty;
-
 use Spatie\QueryBuilder\AllowedFilter;
+
 use Spatie\QueryBuilder\Exceptions\InvalidFilterQuery;
+use Spatie\QueryBuilder\Exceptions\InvalidSubject;
 use Spatie\QueryBuilder\Filters\Filter as CustomFilter;
 use Spatie\QueryBuilder\Filters\Filter as FilterInterface;
 use Spatie\QueryBuilder\Filters\FiltersExact;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\Tests\TestClasses\Models\TestModel;
+use function PHPUnit\Framework\assertObjectHasProperty;
 
 beforeEach(function () {
     $this->models = TestModel::factory()->count(5)->create();
+});
+
+it('cannot filter when subject is a model instance', function () {
+    $this->expectException(InvalidSubject::class);
+    $this->expectExceptionMessage(sprintf('Subject class `%s` is invalid.', TestModel::class));
+
+    createQueryFromFilterRequest(
+        [
+            'name' => $this->models->first()->name,
+        ],
+        $this->models->first()
+    )
+        ->allowedFilters('name');
 });
 
 it('can filter models by partial property by default', function () {

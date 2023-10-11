@@ -4,18 +4,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-use function PHPUnit\Framework\assertObjectHasProperty;
-
 use Spatie\QueryBuilder\AllowedFilter;
+
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\Enums\SortDirection;
 use Spatie\QueryBuilder\Exceptions\InvalidSortQuery;
+use Spatie\QueryBuilder\Exceptions\InvalidSubject;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\Sorts\Sort as SortInterface;
 use Spatie\QueryBuilder\Sorts\SortsField;
 use Spatie\QueryBuilder\Tests\Concerns\AssertsCollectionSorting;
 
 use Spatie\QueryBuilder\Tests\TestClasses\Models\TestModel;
+use function PHPUnit\Framework\assertObjectHasProperty;
 
 uses(AssertsCollectionSorting::class);
 
@@ -23,6 +24,18 @@ beforeEach(function () {
     DB::enableQueryLog();
 
     $this->models = TestModel::factory()->count(5)->create();
+});
+
+it('cannot sort when subject is a model instance', function () {
+    $this->expectException(InvalidSubject::class);
+    $this->expectExceptionMessage(sprintf('Subject class `%s` is invalid.', TestModel::class));
+
+    $request = new Request([
+        'sort' => 'name',
+    ]);
+
+    QueryBuilder::for(TestModel::first(), $request)
+        ->allowedSorts('name');
 });
 
 it('can sort a query ascending', function () {

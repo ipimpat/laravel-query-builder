@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\Exceptions\AllowedFieldsMustBeCalledBeforeAllowedIncludes;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
+use Spatie\QueryBuilder\Exceptions\InvalidSubject;
 use Spatie\QueryBuilder\Exceptions\UnknownIncludedFieldsQuery;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\Tests\TestClasses\Models\RelatedModel;
@@ -13,6 +14,18 @@ beforeEach(function () {
     $this->model = TestModel::factory()->create();
 
     $this->modelTableName = $this->model->getTable();
+});
+
+it('cannot select fields when subject is a model instance', function () {
+    $this->expectException(InvalidSubject::class);
+    $this->expectExceptionMessage(sprintf('Subject class `%s` is invalid.', TestModel::class));
+
+    $request = new Request([
+        'fields' => ['test_models' => 'name,id'],
+    ]);
+
+    QueryBuilder::for(TestModel::first(), $request)
+        ->allowedFields(['name', 'id']);
 });
 
 it('fetches all columns if no field was requested', function () {
