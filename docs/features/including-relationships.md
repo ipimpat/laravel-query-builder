@@ -3,7 +3,7 @@ title: Including relationships
 weight: 3
 ---
 
-The `include` query parameter will load any Eloquent relation or relation count on the resulting models.
+The `include` query parameter will load any Eloquent relation or relation count on the resulting models or an already retrieved model.
 All includes must be explicitly allowed using `allowedIncludes()`. This method takes an array of relationship names or `AllowedInclude` instances.
 
 ## Basic usage
@@ -29,6 +29,16 @@ $users = QueryBuilder::for(User::class)
 // $users will contain all users with their posts and permissions loaded
 ```
 
+It is also possible to lazy eager loading relationships after the parent model has already been retrieved:
+
+```php
+$user = User::find(1);
+
+QueryBuilder::for($user)->allowedIncludes('posts');
+
+// $user will have all it's `posts()` related models loaded
+```
+
 ## Default includes
 
 There is no way to include relationships by default in this package. Default relationships are built-in to Laravel itself using the `with()` method on a query:
@@ -41,6 +51,21 @@ $users = QueryBuilder::for(User::class)
     ->withExists('posts')
     ->get();
 ```
+
+Or when lazy eager loading after the parent model that has already been retrieved:
+
+```php
+$user = User::find(1);
+
+QueryBuilder::for($user)
+    ->allowedIncludes(['friends'])
+    ->load('posts') // posts will always by included, friends can be requested
+    ->loadCount('posts')
+    ->loadExists('posts');
+
+// $user will have all it's `posts()` related models loaded
+```
+[Read more about lazy eager loading here](https://laravel.com/docs/master/eloquent-relationships#lazy-eager-loading).
 
 ## Disallowed includes
 
@@ -62,9 +87,9 @@ $users = QueryBuilder::for(User::class)
 
 ## Including related model count
 
-Every allowed include will automatically allow requesting its related model count using a `Count` suffix. On top of that it's also possible to specifically allow requesting and querying the related model count (and not include the entire relationship).
+Every allowed include will automatically allow requesting its related model count using a `Count` suffix. On top of that it's also possible to specifically allow requesting and querying the related model count (and not include the entire relationship), even when lazy eager loading.
 
-Under the hood this uses Laravel's `withCount method`. [Read more about the `withCount` method here](https://laravel.com/docs/master/eloquent-relationships#counting-related-models).
+Under the hood this uses Laravel's `withCount and loadCount method`. [Read more about the `withCount` and `loadCount` method here](https://laravel.com/docs/master/eloquent-relationships#counting-related-models).
 
 ```php
 // GET /users?include=postsCount,friendsCount
@@ -81,7 +106,7 @@ $users = QueryBuilder::for(User::class)
 
 Every allowed include will automatically allow requesting its related model exists using a `Exists` suffix. On top of that it's also possible to specifically allow requesting and querying the related model exists (and not include the entire relationship).
 
-Under the hood this uses Laravel's `withExists method`. [Read more about the `withExists` method here](https://laravel.com/docs/master/eloquent-relationships#other-aggregate-functions).
+Under the hood this uses Laravel's `withExists method`. [Read more about the `withExists` and `loadExists` method here](https://laravel.com/docs/master/eloquent-relationships#other-aggregate-functions).
 
 ```php
 // GET /users?include=postsExists,friendsExists
