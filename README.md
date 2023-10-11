@@ -33,6 +33,16 @@ $users = QueryBuilder::for(User::class)
 // all `User`s with their `posts` loaded
 ```
 
+Or lazy eager loading after the parent model has already been retrieved.
+
+```php
+$user = User::find(1);
+
+QueryBuilder::for($user)->allowedIncludes('posts');
+
+// `User` with it's `posts` loaded
+```
+
 [Read more about include features like: including nested relationships, including relationship count, custom includes, ...](https://spatie.be/docs/laravel-query-builder/v5/features/including-relationships/)
 
 ### Sorting a query based on a request: `/users?sort=id`:
